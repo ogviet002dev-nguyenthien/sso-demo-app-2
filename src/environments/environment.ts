@@ -4,8 +4,9 @@
 
 export const environment = {
   production: false,
-  cognitoUserPoolId: 'ap-northeast-1_9Tcyh7WCd',
-  cognitoAppClientId: '6srk0e51ri3f3g35ttqbfhahj0',
+  apiUrl: 'https://sandbox-app1-be.sakuramobile.jp',
+  cognitoUserPoolId: 'ap-northeast-1_XBz0pkKY2',
+  cognitoAppClientId: '5fab9a43joj1sl9m9lvbugblme',
 };
 
 /*

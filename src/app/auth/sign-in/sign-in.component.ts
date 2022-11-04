@@ -5,6 +5,7 @@ import {
   AuthenticationDetails,
   CognitoUser,
   CognitoUserPool,
+  CookieStorage,
 } from 'amazon-cognito-identity-js';
 import { StoreData } from 'src/app/model/store_data';
 import { environment } from 'src/environments/environment';
@@ -66,7 +67,7 @@ export class SignInComponent implements OnInit {
             id_token: idToken,
           };
           this.storeService.storeTokenData(tokens);
-          localStorage.setItem('email', this.email_address);
+          // localStorage.setItem('email', this.email_address);
           this.router.navigate(['dashboard']);
         },
 

@@ -3,7 +3,6 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { StoreData } from '../model/store_data';
-import { catchError, tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',
@@ -31,14 +30,16 @@ export class StoreService {
   public storeTokenData(data: StoreData): void {
     this.http
       .post(`${environment.apiUrl}/store`, data)
-      .subscribe((result) => console.log('store token successfull:::', result));
+      .subscribe((result) =>
+        console.log('Store token on server successfull:::', result)
+      );
   }
 
   public deleteStoreToken(data: { email: string; access_token: string }) {
     this.http
       .post(`${environment.apiUrl}/sign_out`, data)
       .subscribe((result) =>
-        console.log('delete store token successfull:::', result)
+        console.log('delete store token on server successfull:::', result)
       );
   }
 }

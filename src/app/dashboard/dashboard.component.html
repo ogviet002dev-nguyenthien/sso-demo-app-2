@@ -1,3 +1,14 @@
-<h1>Angular App 1</h1>
-<button (click)="openApp2()">Open App 2</button>
-<button (click)="onLogout()">Log out</button>
+<div>
+  <h1>I am in dashboard app 1</h1>
+  <div *ngIf="accessToken">
+    <h2>Tokens:</h2>
+    <p>Access token: {{ accessToken }}</p>
+  </div>
+  <div *ngIf="email">
+    <h2>User Info:</h2>
+    <p>Email: {{ email }}</p>
+  </div>
+  <div style="margin: 5em 5em">
+    <button (click)="onLogout()">Logout</button>
+  </div>
+</div>

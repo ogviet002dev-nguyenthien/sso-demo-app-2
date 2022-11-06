@@ -3,7 +3,6 @@ import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 import { environment } from 'src/environments/environment';
 import { StoreData } from '../model/store_data';
-import { catchError, tap } from 'rxjs/operators';
 
 @Injectable({
   providedIn: 'root',

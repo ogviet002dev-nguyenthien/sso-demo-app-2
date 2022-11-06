@@ -28,7 +28,7 @@ export class AuthGuard implements CanActivate {
     let isAuthAWS = this.authService.isLoggedInOnCognito(); // check login status of user on Cognito
 
     return combineLatest([isAuthServer, isAuthAWS]).pipe(
-      tap((data) => console.log('status of both', data)),
+      tap((data) => console.log('status of bothside::', data)),
       map((data) => {
         const [isServer, isAws] = data;
         if (!isServer && !isAws) {

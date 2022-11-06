@@ -3,7 +3,7 @@ import { HttpClient } from '@angular/common/http';
 import { CognitoUserPool } from 'amazon-cognito-identity-js';
 import { environment } from 'src/environments/environment';
 import { Observable, of } from 'rxjs';
-import { map, catchError, switchMap, tap } from 'rxjs/operators';
+import { map, catchError, switchMap, tap, filter } from 'rxjs/operators';
 import { StoreService } from './store.service';
 
 @Injectable({
@@ -29,7 +29,7 @@ export class AuthService {
               console.log('status of user logged on server:::', data)
             ),
             catchError((error) => {
-              console.log('status of user logged on server:::', error.message);
+              console.log('error of user logged on server:::', error.message);
               return of(false);
             })
           );

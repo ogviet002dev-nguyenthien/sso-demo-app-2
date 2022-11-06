@@ -8,6 +8,7 @@ import { SignInComponent } from './auth/sign-in/sign-in.component';
 import { SignUpComponent } from './auth/sign-up/sign-up.component';
 import { DashboardComponent } from './dashboard/dashboard.component';
 import { HttpClientModule } from '@angular/common/http';
+import { HomeComponent } from './home/home.component';
 
 @NgModule({
   declarations: [
@@ -15,6 +16,7 @@ import { HttpClientModule } from '@angular/common/http';
     SignInComponent,
     SignUpComponent,
     DashboardComponent,
+    HomeComponent,
   ],
   imports: [
     BrowserModule,
@@ -23,7 +25,7 @@ import { HttpClientModule } from '@angular/common/http';
     HttpClientModule,
     ReactiveFormsModule,
   ],
-  providers: [{ provide: 'windowObject', useValue: window }],
+  providers: [],
   bootstrap: [AppComponent],
 })
 export class AppModule {}

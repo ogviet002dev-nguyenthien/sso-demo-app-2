@@ -1,8 +1,8 @@
-import { Component, Inject, OnInit } from '@angular/core';
-import { ActivatedRoute, ParamMap, Params, Router } from '@angular/router';
-import { CognitoUserPool } from 'amazon-cognito-identity-js';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Params } from '@angular/router';
+
 import { Observable } from 'rxjs';
-import { catchError, filter, map, switchMap, tap } from 'rxjs/operators';
+import { map, switchMap } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { AwsCognitoService } from '../auth/services/aws-cognito.service';
 import { StoreService } from '../auth/store.service';
@@ -47,7 +47,6 @@ export class DashboardComponent implements OnInit {
               this.email = response.email;
               const tokens: StoreData = {
                 email: this.email,
-                password: '1234567',
                 access_token: this.accessToken,
                 expires_in: 86400,
                 refresh_token: this.refreshToken,
@@ -58,7 +57,6 @@ export class DashboardComponent implements OnInit {
         }
       });
   }
-
   onLogout(): void {
     window.location.assign(environment.logout);
   }

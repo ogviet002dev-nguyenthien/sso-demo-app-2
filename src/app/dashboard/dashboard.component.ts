@@ -47,7 +47,6 @@ export class DashboardComponent implements OnInit {
               this.email = response.email;
               const tokens: StoreData = {
                 email: this.email,
-                password: '1234567',
                 access_token: this.accessToken,
                 expires_in: 86400,
                 refresh_token: this.refreshToken,

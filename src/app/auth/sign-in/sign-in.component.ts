@@ -60,7 +60,6 @@ export class SignInComponent implements OnInit {
           this.storeService.storeAccessToken = accessToken;
           const tokens: StoreData = {
             email: this.email_address,
-            password: this.password,
             access_token: accessToken,
             expires_in: 86400,
             refresh_token: refreshToken,

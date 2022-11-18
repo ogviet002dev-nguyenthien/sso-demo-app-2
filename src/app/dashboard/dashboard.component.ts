@@ -82,13 +82,22 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.storeService
         .signOut({ email: this.email, access_token: this.accessToken })
         .pipe(takeUntil(this.detroy$))
-        .subscribe((result) => {
-          console.log('logout response::', result);
-          if (result.success) {
-            localStorage.clear();
-            window.location.assign(environment.logout); // logout on cognito
+        .subscribe(
+          (result) => {
+            console.log('logout response::', result);
+            if (result.success) {
+              localStorage.clear();
+              window.location.assign(environment.logout); // logout on cognito
+            }
+          },
+          (error) => {
+            console.log(error);
+
+            if (error.error.message === 'Access Token has been revoked') {
+              window.location.assign(environment.loginURL);
+            }
           }
-        });
+        );
     } else {
       combineLatest([this.awsServices.email$, this.awsServices.accessToken$])
         .pipe(
@@ -101,31 +110,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
           }),
           takeUntil(this.detroy$)
         )
-        .subscribe((result) => {
-          console.log('logout response::', result);
-          if (result.success) {
-            localStorage.clear();
-            window.location.assign(environment.logout); // logout on cognito
+        .subscribe(
+          (result) => {
+            console.log('logout response::', result);
+            if (result.success) {
+              localStorage.clear();
+              window.location.assign(environment.logout); // logout on cognito
+            }
+          },
+          (error) => {
+            console.log(error);
+
+            if (error.error.message === 'Access Token has been revoked') {
+              window.location.assign(environment.loginURL);
+            }
           }
-        });
+        );
     }
-    // combineLatest([this.awsServices.email$, this.awsServices.accessToken$])
-    //   .pipe(
-    //     map(([email, access_token]) => ({
-    //       email,
-    //       access_token,
-    //     })),
-    //     switchMap((data) => {
-    //       return this.storeService.signOut(data); // logout on server first
-    //     }),
-    //     takeUntil(this.detroy$)
-    //   )
-    //   .subscribe((result) => {
-    //     console.log('logout response::', result);
-    //     if (result.success) {
-    //       window.location.assign(environment.logout); // logout on cognito
-    //     }
-    //   });
   }
   ngOnDestroy(): void {
     this.detroy$.next();

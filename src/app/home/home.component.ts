@@ -37,12 +37,3 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.detroy$.complete();
   }
 }
-// this.access_token$ = this.activeRoute.queryParams.pipe(
-//   map((param) => param?.code),
-//   switchMap((code) => this.awsServices.getTokenDetailFromCognito(code)),
-//   map((result) => result?.access_token),
-//   tap((token) => (this.awsServices.setToken = token))
-// );
-// this.userInfor$ = this.awsServices.accessToken$.pipe(
-//   switchMap((token) => this.awsServices.getUserInfoFromCognito(token))
-// );

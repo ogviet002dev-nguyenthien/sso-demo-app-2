@@ -15,30 +15,59 @@ export class AuthService {
 
   constructor(
     private awsService: AwsCognitoService,
-    private http: HttpClient,
-    private storeService: StoreService
+    private http: HttpClient
   ) {}
-
   isLoggedInOnServer(): Observable<boolean> {
-    return this.awsService.accessToken$.pipe(
-      switchMap((data) => {
-        const tokenObj = {
-          access_token: data,
-        };
-
-        return this.http.post<Auth>(this.url, tokenObj).pipe(
-          tap((data) =>
-            console.log('status of user logged on server:::', data)
-          ),
-          map((result) => result.login),
-          catchError((error) => {
-            console.log('error of user logged on server:::', error.message);
-            return of(false);
-          })
-        );
-      })
-    );
+    const access_token = localStorage.getItem('access_token');
+    if (access_token) {
+      return this.http.post<Auth>(this.url, { access_token }).pipe(
+        tap((data) => console.log('status of user logged on server:::', data)),
+        map((result) => result.login),
+        catchError((error) => {
+          console.log('error of user logged on server:::', error.message);
+          return of(false);
+        })
+      );
+    } else {
+      return this.awsService.accessToken$.pipe(
+        switchMap((data) => {
+          const tokenObj = {
+            access_token: data,
+          };
+          return this.http.post<Auth>(this.url, tokenObj).pipe(
+            tap((data) =>
+              console.log('status of user logged on server:::', data)
+            ),
+            map((result) => result.login),
+            catchError((error) => {
+              console.log('error of user logged on server:::', error.message);
+              return of(false);
+            })
+          );
+        })
+      );
+    }
   }
+  // isLoggedInOnServer(): Observable<boolean> {
+  //   return this.awsService.accessToken$.pipe(
+  //     switchMap((data) => {
+  //       const tokenObj = {
+  //         access_token: data,
+  //       };
+
+  //       return this.http.post<Auth>(this.url, tokenObj).pipe(
+  //         tap((data) =>
+  //           console.log('status of user logged on server:::', data)
+  //         ),
+  //         map((result) => result.login),
+  //         catchError((error) => {
+  //           console.log('error of user logged on server:::', error.message);
+  //           return of(false);
+  //         })
+  //       );
+  //     })
+  //   );
+  // }
 
   // isLoggedInOnCognito(): Observable<boolean> {
   //   var isAuth = false;

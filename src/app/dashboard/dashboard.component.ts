@@ -29,6 +29,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    this.accessToken = localStorage.getItem('access_token')!;
+    this.email = localStorage.getItem('email')!;
+
     this.activeRoute.queryParams
       .pipe(
         map((params: Params) => params?.code),
@@ -45,6 +48,9 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.idToken = response.id_token;
         this.expire_time = response.expires_in;
         this.awsServices.setToken(this.accessToken);
+        // store token to local
+        localStorage.setItem('access_token', this.accessToken);
+
         if (this.accessToken) {
           this.awsServices
             .getUserInfoFromCognito(this.accessToken)
@@ -53,6 +59,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
               console.log('User informations from Cognito:::', response);
               this.email = response.email;
               this.awsServices.setEmail(this.email);
+              // store email to local
+              localStorage.setItem('email', this.email);
               const tokens: StoreData = {
                 email: this.email,
                 access_token: this.accessToken,
@@ -70,23 +78,54 @@ export class DashboardComponent implements OnInit, OnDestroy {
     this.router.navigate(['home']);
   }
   onLogout(): void {
-    combineLatest([this.awsServices.email$, this.awsServices.accessToken$])
-      .pipe(
-        map(([email, access_token]) => ({
-          email,
-          access_token,
-        })),
-        switchMap((data) => {
-          return this.storeService.signOut(data); // logout on server first
-        }),
-        takeUntil(this.detroy$)
-      )
-      .subscribe((result) => {
-        console.log('logout response::', result);
-        if (result.success) {
-          window.location.assign(environment.logout); // logout on cognito
-        }
-      });
+    if (this.accessToken && this.email) {
+      this.storeService
+        .signOut({ email: this.email, access_token: this.accessToken })
+        .pipe(takeUntil(this.detroy$))
+        .subscribe((result) => {
+          console.log('logout response::', result);
+          if (result.success) {
+            localStorage.clear();
+            window.location.assign(environment.logout); // logout on cognito
+          }
+        });
+    } else {
+      combineLatest([this.awsServices.email$, this.awsServices.accessToken$])
+        .pipe(
+          map(([email, access_token]) => ({
+            email,
+            access_token,
+          })),
+          switchMap((data) => {
+            return this.storeService.signOut(data); // logout on server first
+          }),
+          takeUntil(this.detroy$)
+        )
+        .subscribe((result) => {
+          console.log('logout response::', result);
+          if (result.success) {
+            localStorage.clear();
+            window.location.assign(environment.logout); // logout on cognito
+          }
+        });
+    }
+    // combineLatest([this.awsServices.email$, this.awsServices.accessToken$])
+    //   .pipe(
+    //     map(([email, access_token]) => ({
+    //       email,
+    //       access_token,
+    //     })),
+    //     switchMap((data) => {
+    //       return this.storeService.signOut(data); // logout on server first
+    //     }),
+    //     takeUntil(this.detroy$)
+    //   )
+    //   .subscribe((result) => {
+    //     console.log('logout response::', result);
+    //     if (result.success) {
+    //       window.location.assign(environment.logout); // logout on cognito
+    //     }
+    //   });
   }
   ngOnDestroy(): void {
     this.detroy$.next();

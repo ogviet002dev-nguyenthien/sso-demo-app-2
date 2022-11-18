@@ -18,7 +18,6 @@ export class TokenResolver implements Resolve<any> {
   constructor(
     private router: Router,
     private activeRoute: ActivatedRoute,
-    // private location: Location,
     private awsServices: AwsCognitoService
   ) {}
   resolve(

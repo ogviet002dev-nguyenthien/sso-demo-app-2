@@ -1,7 +1,8 @@
 export interface StoreData {
   email: string;
   access_token: string;
-  expires_in: number;
+  expire_time: number;
   refresh_token: string;
   id_token: string;
+  subscriber: string;
 }

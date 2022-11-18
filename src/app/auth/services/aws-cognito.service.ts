@@ -1,6 +1,6 @@
 import { HttpClient, HttpHeaders } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { Observable } from 'rxjs';
+import { BehaviorSubject, Observable } from 'rxjs';
 import { environment } from 'src/environments/environment';
 
 @Injectable({
@@ -8,13 +8,20 @@ import { environment } from 'src/environments/environment';
 })
 export class AwsCognitoService {
   constructor(private http: HttpClient) {}
+
+  private accessTokenSubject = new BehaviorSubject<string>('');
+  public accessToken$ = this.accessTokenSubject.asObservable();
+
+  private emailSubject = new BehaviorSubject<string>('');
+  public email$ = this.emailSubject.asObservable();
+
   public getTokenDetailFromCognito(code: string): Observable<any> {
-    console.log('aws services code:::::>', code);
+    console.log(environment.sso_client_id, environment.sso_client_secret_pw);
 
     const params_in_body = {
       grant_type: 'authorization_code',
       code: code,
-      scope: 'openid+profile',
+      scope: 'aws.cognito.signin.user.admin+openid+profile',
       redirect_uri: environment.redirectURL,
     };
     const body = Object.keys(params_in_body)
@@ -37,9 +44,6 @@ export class AwsCognitoService {
       }),
     });
   }
-  public logoutUserFromCognito(): Observable<any> {
-    return this.http.get<any>(environment.logout);
-  }
 
   public getUserInfoFromCognito(access_token: string): Observable<any> {
     return this.http.get<any>(environment.userInfoURL, {
@@ -47,5 +51,15 @@ export class AwsCognitoService {
         Authorization: `Bearer ${access_token}`,
       }),
     });
+  }
+  public logoutUserFromCognito(): Observable<any> {
+    return this.http.get<any>(environment.logout);
+  }
+
+  setToken(token: string) {
+    this.accessTokenSubject.next(token);
+  }
+  setEmail(email: string) {
+    this.emailSubject.next(email);
   }
 }

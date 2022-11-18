@@ -1,7 +1,16 @@
 <div>
-  <h1>Application Home Page!</h1>
+  <h1>This is Home Page!</h1>
+  <ng-container *ngIf="isLogin; else notLogin">
+    <h3>You are logged in</h3>
+  </ng-container>
+  <ng-template #notLogin>
+    <h3>You are not login</h3>
+  </ng-template>
 
-  <div style="margin: 5em 5em">
-    <button (click)="navigateToDashboard()">Login</button>
+  <div style="margin: 2em 2em">
+    <button *ngIf="isLogin" (click)="navigateToDashboard()">
+      Go to Dashboard
+    </button>
+    <button *ngIf="!isLogin" (click)="navigateToLogin()">Login</button>
   </div>
 </div>

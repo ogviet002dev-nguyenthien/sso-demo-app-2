@@ -1,8 +1,7 @@
-import { Component, OnInit } from '@angular/core';
-import { ActivatedRoute, Params } from '@angular/router';
-
-import { Observable } from 'rxjs';
-import { map, switchMap } from 'rxjs/operators';
+import { Component, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Params, Router } from '@angular/router';
+import { combineLatest, Observable, pipe, Subject } from 'rxjs';
+import { filter, map, switchMap, takeUntil } from 'rxjs/operators';
 import { environment } from 'src/environments/environment';
 import { AwsCognitoService } from '../auth/services/aws-cognito.service';
 import { StoreService } from '../auth/store.service';
@@ -13,51 +12,84 @@ import { StoreData } from '../model/store_data';
   templateUrl: './dashboard.component.html',
   styleUrls: ['./dashboard.component.sass'],
 })
-export class DashboardComponent implements OnInit {
-  email: string = '';
-  accessToken: string = '';
-  refreshToken: string = '';
-  idToken: string = '';
-  token$!: Observable<any>;
-  userInfor$!: Observable<any>;
+export class DashboardComponent implements OnInit, OnDestroy {
+  email!: string;
+  accessToken!: string;
+  refreshToken!: string;
+  idToken!: string;
+  expire_time!: number;
+  token$: Observable<string> = this.awsServices.accessToken$;
+  email$: Observable<string> = this.awsServices.email$;
+  detroy$ = new Subject<void>();
   constructor(
     private storeService: StoreService,
     private activeRoute: ActivatedRoute,
-    private awsServices: AwsCognitoService
+    private awsServices: AwsCognitoService,
+    private router: Router
   ) {}
 
   ngOnInit(): void {
     this.activeRoute.queryParams
       .pipe(
         map((params: Params) => params?.code),
+        filter((code) => code),
         switchMap((code: string) => {
           return this.awsServices.getTokenDetailFromCognito(code);
-        })
+        }),
+        takeUntil(this.detroy$)
       )
       .subscribe((response) => {
         console.log('Response tokens from Cognito: ', response);
         this.accessToken = response.access_token;
         this.refreshToken = response.refresh_token;
         this.idToken = response.id_token;
+        this.expire_time = response.expires_in;
+        this.awsServices.setToken(this.accessToken);
         if (this.accessToken) {
           this.awsServices
             .getUserInfoFromCognito(this.accessToken)
+            .pipe(takeUntil(this.detroy$))
             .subscribe((response) => {
               console.log('User informations from Cognito:::', response);
               this.email = response.email;
+              this.awsServices.setEmail(this.email);
               const tokens: StoreData = {
                 email: this.email,
                 access_token: this.accessToken,
-                expires_in: 86400,
+                expire_time: this.expire_time,
                 refresh_token: this.refreshToken,
                 id_token: this.idToken,
+                subscriber: response.sub,
               };
               this.storeService.storeTokenData(tokens);
             });
         }
       });
   }
+  goHome() {
+    this.router.navigate(['home']);
+  }
   onLogout(): void {
-    window.location.assign(environment.logout);
+    combineLatest([this.awsServices.email$, this.awsServices.accessToken$])
+      .pipe(
+        map(([email, access_token]) => ({
+          email,
+          access_token,
+        })),
+        switchMap((data) => {
+          return this.storeService.signOut(data); // logout on server first
+        }),
+        takeUntil(this.detroy$)
+      )
+      .subscribe((result) => {
+        console.log('logout response::', result);
+        if (result.success) {
+          window.location.assign(environment.logout); // logout on cognito
+        }
+      });
+  }
+  ngOnDestroy(): void {
+    this.detroy$.next();
+    this.detroy$.complete();
   }
 }

@@ -1,14 +1,13 @@
 <div>
-  <h1>I am in dashboard app 1</h1>
-  <div *ngIf="accessToken">
+  <h1>Dashboard app 2</h1>
+  <h4>Wellcome {{ email || (email$ | async) }}</h4>
+  <div>
     <h2>Tokens:</h2>
-    <p>Access token: {{ accessToken }}</p>
+    <i>Access token: {{ accessToken || (token$ | async) }}</i>
   </div>
-  <div *ngIf="email">
-    <h2>User Info:</h2>
-    <p>Email: {{ email }}</p>
-  </div>
+
   <div style="margin: 2em 2em">
     <button style="margin-left: 2em" (click)="onLogout()">Logout</button>
+    <button style="margin-left: 2em" (click)="goHome()">Home Page</button>
   </div>
 </div>

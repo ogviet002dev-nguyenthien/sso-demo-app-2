@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { CognitoUserPool } from 'amazon-cognito-identity-js';
 import { environment } from 'src/environments/environment';
 import { Observable, of } from 'rxjs';
 import { map, catchError, switchMap, tap, filter } from 'rxjs/operators';
+import { AwsCognitoService } from './services/aws-cognito.service';
+import { Auth } from '../model/auth';
 import { StoreService } from './store.service';
 
 @Injectable({
@@ -12,53 +13,56 @@ import { StoreService } from './store.service';
 export class AuthService {
   private url: string = `${environment.apiUrl}/auth`;
 
-  constructor(private storeService: StoreService, private http: HttpClient) {}
+  constructor(
+    private awsService: AwsCognitoService,
+    private http: HttpClient,
+    private storeService: StoreService
+  ) {}
 
   isLoggedInOnServer(): Observable<boolean> {
-    return this.storeService.email$.pipe(
-      // filter((email) => email !== ''),
+    return this.awsService.accessToken$.pipe(
       switchMap((data) => {
-        return this.http
-          .post<{ success: boolean; login: boolean }>(this.url, {
-            email: data,
+        const tokenObj = {
+          access_token: data,
+        };
+
+        return this.http.post<Auth>(this.url, tokenObj).pipe(
+          tap((data) =>
+            console.log('status of user logged on server:::', data)
+          ),
+          map((result) => result.login),
+          catchError((error) => {
+            console.log('error of user logged on server:::', error.message);
+            return of(false);
           })
-          .pipe(
-            map((result) => result.login),
-            tap((data) =>
-              console.log('status of user logged on server:::', data)
-            ),
-            catchError((error) => {
-              console.log('error of user logged on server:::', error.message);
-              return of(false);
-            })
-          );
+        );
       })
     );
   }
 
-  isLoggedInOnCognito(): Observable<boolean> {
-    var isAuth = false;
+  // isLoggedInOnCognito(): Observable<boolean> {
+  //   var isAuth = false;
 
-    let poolData = {
-      UserPoolId: environment.cognitoUserPoolId,
-      ClientId: environment.cognitoAppClientId,
-    };
+  //   let poolData = {
+  //     UserPoolId: environment.cognitoUserPoolId,
+  //     ClientId: environment.cognitoAppClientId,
+  //   };
 
-    var userPool = new CognitoUserPool(poolData);
-    var cognitoUser = userPool.getCurrentUser();
+  //   var userPool = new CognitoUserPool(poolData);
+  //   var cognitoUser = userPool.getCurrentUser();
 
-    console.log('userPool', userPool);
-    console.log('cognitoUser', cognitoUser);
+  //   console.log('userPool', userPool);
+  //   console.log('cognitoUser', cognitoUser);
 
-    if (cognitoUser != null) {
-      cognitoUser.getSession((err: any, session: any) => {
-        if (err) {
-          alert(err.message || JSON.stringify(err));
-        }
-        console.log('session', session.isValid());
-        isAuth = session.isValid();
-      });
-    }
-    return of(isAuth);
-  }
+  //   if (cognitoUser != null) {
+  //     cognitoUser.getSession((err: any, session: any) => {
+  //       if (err) {
+  //         alert(err.message || JSON.stringify(err));
+  //       }
+  //       console.log('session', session.isValid());
+  //       isAuth = session.isValid();
+  //     });
+  //   }
+  //   return of(isAuth);
+  // }
 }

@@ -15,9 +15,6 @@ const routes: Routes = [
   {
     path: 'dashboard',
     component: DashboardComponent,
-    // resolve: {
-    //   token: TokenResolver,
-    // },
     // canActivate: [AuthGuard],
   },
   { path: '', redirectTo: '/home', pathMatch: 'full' },

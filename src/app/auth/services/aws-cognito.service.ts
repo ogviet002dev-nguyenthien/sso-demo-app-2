@@ -44,7 +44,6 @@ export class AwsCognitoService {
       }),
     });
   }
-
   public getUserInfoFromCognito(access_token: string): Observable<any> {
     return this.http.get<any>(environment.userInfoURL, {
       headers: new HttpHeaders({
